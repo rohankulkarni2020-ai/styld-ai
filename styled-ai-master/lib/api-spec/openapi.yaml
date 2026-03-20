@@ -1,0 +1,234 @@
+openapi: 3.1.0
+info:
+  title: Api
+  version: 0.1.0
+  description: API specification
+servers:
+  - url: /api
+    description: Base API path
+tags:
+  - name: health
+    description: Health operations
+  - name: outfit
+    description: AI Outfit generation operations
+paths:
+  /healthz:
+    get:
+      operationId: healthCheck
+      tags: [health]
+      summary: Health check
+      description: Returns server health status
+      responses:
+        "200":
+          description: Healthy
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthStatus"
+  /outfit/start:
+    post:
+      operationId: startOutfit
+      tags: [outfit]
+      summary: Start outfit generation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/OutfitRequest"
+      responses:
+        "200":
+          description: Job started
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutfitJobResponse"
+  /outfit/poll/{jobId}:
+    get:
+      operationId: pollOutfit
+      tags: [outfit]
+      summary: Poll outfit job status
+      parameters:
+        - name: jobId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Job status
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OutfitJob"
+        "404":
+          description: Job not found
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /outfit/history:
+    get:
+      operationId: getOutfitHistory
+      tags: [outfit]
+      summary: Get outfit history
+      responses:
+        "200":
+          description: List of completed outfits
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/OutfitJob"
+components:
+  schemas:
+    HealthStatus:
+      type: object
+      properties:
+        status:
+          type: string
+      required:
+        - status
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: string
+      required:
+        - error
+    OutfitRequest:
+      type: object
+      properties:
+        prompt:
+          type: string
+      required:
+        - prompt
+    OutfitJobResponse:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+      required:
+        - jobId
+        - status
+    PortalProduct:
+      type: object
+      properties:
+        portal:
+          type: string
+        portalColor:
+          type: string
+        productName:
+          type: string
+        brand:
+          type: string
+        price:
+          type: number
+        originalPrice:
+          type: number
+        discountPercent:
+          type: number
+        rating:
+          type: number
+        reviewCount:
+          type: number
+        productUrl:
+          type: string
+        isBestBuy:
+          type: boolean
+        bestBuyReason:
+          type: string
+      required:
+        - portal
+        - portalColor
+        - productName
+        - brand
+        - price
+        - originalPrice
+        - discountPercent
+        - rating
+        - reviewCount
+        - productUrl
+        - isBestBuy
+        - bestBuyReason
+    OutfitItem:
+      type: object
+      properties:
+        id:
+          type: string
+        category:
+          type: string
+        description:
+          type: string
+        color:
+          type: string
+        whyRecommended:
+          type: string
+        portalProducts:
+          type: array
+          items:
+            $ref: "#/components/schemas/PortalProduct"
+      required:
+        - id
+        - category
+        - description
+        - color
+        - whyRecommended
+        - portalProducts
+    Outfit:
+      type: object
+      properties:
+        outfitTitle:
+          type: string
+        styleDescription:
+          type: string
+        occasion:
+          type: string
+        targetProfile:
+          type: string
+        totalBudgetMin:
+          type: number
+        totalBudgetMax:
+          type: number
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/OutfitItem"
+        outfitImage:
+          type: string
+          nullable: true
+      required:
+        - outfitTitle
+        - styleDescription
+        - occasion
+        - targetProfile
+        - totalBudgetMin
+        - totalBudgetMax
+        - items
+    OutfitJob:
+      type: object
+      properties:
+        jobId:
+          type: string
+        status:
+          type: string
+        prompt:
+          type: string
+        outfits:
+          type: array
+          items:
+            $ref: "#/components/schemas/Outfit"
+        error:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+      required:
+        - jobId
+        - status
+        - prompt
+        - outfits
+        - createdAt
